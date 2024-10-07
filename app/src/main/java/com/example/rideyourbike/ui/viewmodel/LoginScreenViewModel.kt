@@ -1,8 +1,16 @@
 package com.example.rideyourbike.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.rideyourbike.ui.main_screen.MainScreenState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class LoginScreenViewModel : ViewModel() {
+
+    val _state = MutableStateFlow<MainScreenState>(MainScreenState())
+    val state: StateFlow<MainScreenState> = _state
 
     init {
 
@@ -10,11 +18,14 @@ class LoginScreenViewModel : ViewModel() {
 
     fun login () : Boolean {
 
-        // do the login thing here
+        return true
+    }
 
-        // return true or false depending upon successful authentication
-        // for now, let's just hardwire this to true for dev purposes
-        return false
+    fun getStravaData() {
+        viewModelScope.launch {
+            // get data from repo
+            // update state object
+        }
     }
 
 }

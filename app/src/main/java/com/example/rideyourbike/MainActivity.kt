@@ -2,6 +2,7 @@ package com.example.rideyourbike
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.drm.DrmStore
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -20,8 +21,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.rideyourbike.ui.theme.RideyourbikeTheme
 import com.example.rideyourbike.ui.viewmodel.LoginScreenViewModel
 
@@ -36,21 +40,17 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         // read the intent that started the activity
-        val data: Uri? = intent?.data
-
-        // determine if it is the default launch or if it was captured from a URL
-        // if (from URL)
-        // get the data from the URL, call Strava API and get authentication token
-        // when authenticated, get call API and get data to display on the next screen
-
-        // ATTENTION: This was auto-generated to handle app links.
         val appLinkIntent: Intent = intent
         val appLinkAction: String? = appLinkIntent.action
         val appLinkData: Uri? = appLinkIntent.data
 
-        val code = appLinkData?.getQueryParameter("code")
-        Log.d("LOGIN",code.toString())
-
+        // determine if it is the default launch or if it was captured from a URL
+        if (appLinkAction != Intent.ACTION_MAIN && appLinkData?.getQueryParameter("code") != null ){
+            // when authenticated, call API and get data to display on the next screen
+            val code = appLinkData.getQueryParameter("code")
+            Log.d("LOGIN", "action: $appLinkAction")
+            Log.d("LOGIN","code: $code")
+        }
 
         setContent {
             RideyourbikeTheme {
@@ -61,11 +61,7 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                             .padding(16.dp)
                     ) {
-                        Text(
-                            text = "Welcome!",
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        )
-
+                        Text(text = "Let's go biking!", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 48.dp))
                         Button(
                             onClick = {
                                 val intentUri = Uri.parse("https://www.strava.com/oauth/mobile/authorize")
@@ -87,7 +83,7 @@ class MainActivity : ComponentActivity() {
                                 .align(Alignment.CenterHorizontally)
                                 .padding(start = 16.dp, top = 350.dp, end = 16.dp, bottom = 16.dp)
                         ) {
-                            Text(text = "Let's go biking!")
+                            Text(text = "Log in with Strava")
                         }
                     }
                 }
