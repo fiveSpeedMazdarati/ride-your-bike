@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -42,14 +43,14 @@ class MainActivity : ComponentActivity() {
         // get the data from the URL, call Strava API and get authentication token
         // when authenticated, get call API and get data to display on the next screen
 
+        // ATTENTION: This was auto-generated to handle app links.
+        val appLinkIntent: Intent = intent
+        val appLinkAction: String? = appLinkIntent.action
+        val appLinkData: Uri? = appLinkIntent.data
 
+        val code = appLinkData?.getQueryParameter("code")
+        Log.d("LOGIN",code.toString())
 
-        // Figure out what to do based on the intent type
-        if (intent?.type?.startsWith("image/") == true) {
-            // Handle intents with image data
-        } else if (intent?.type == "text/plain") {
-            // Handle intents with text
-        }
 
         setContent {
             RideyourbikeTheme {
@@ -76,7 +77,7 @@ class MainActivity : ComponentActivity() {
                                     .appendQueryParameter("scope", "activity:read")
                                     .build()
 
-                                val loginIntent = Intent(Intent.ACTION_VIEW, intentUri, ).also {
+                                val loginIntent = Intent(Intent.ACTION_VIEW, intentUri,  ).also {
                                     startActivity(it)
                                 }
 
@@ -91,8 +92,9 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-            }
         }
+
+    }
     }
 
 
