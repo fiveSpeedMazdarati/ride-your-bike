@@ -55,7 +55,6 @@ class MainActivity : ComponentActivity() {
 
 
         }
-
         setContent {
             RideyourbikeTheme {
 
@@ -65,17 +64,29 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                             .padding(16.dp)
                     ) {
-                        Text(text = "Let's go biking!", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 48.dp))
+                        Text(
+                            text = "Let's go biking!",
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 24.sp,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                                .padding(top = 48.dp)
+                        )
+
+if ( true ) {
                         Button(
                             onClick = {
-                                val intentUri = Uri.parse("https://www.strava.com/oauth/mobile/authorize")
-                                    .buildUpon()
-                                    .appendQueryParameter("client_id", "136135")
-                                    .appendQueryParameter("redirect_uri", "https://www.lukebusch.com/app")
-                                    .appendQueryParameter("response_type", "code")
-                                    .appendQueryParameter("approval_prompt", "auto")
-                                    .appendQueryParameter("scope", "activity:read")
-                                    .build()
+                                val intentUri =
+                                    Uri.parse("https://www.strava.com/oauth/mobile/authorize")
+                                        .buildUpon()
+                                        .appendQueryParameter("client_id", "136135")
+                                        .appendQueryParameter(
+                                            "redirect_uri",
+                                            "https://www.lukebusch.com/app"
+                                        )
+                                        .appendQueryParameter("response_type", "code")
+                                        .appendQueryParameter("approval_prompt", "auto")
+                                        .appendQueryParameter("scope", "activity:read")
+                                        .build()
 
                                 Intent(Intent.ACTION_VIEW, intentUri).also {
                                     startActivity(it)
@@ -88,6 +99,10 @@ class MainActivity : ComponentActivity() {
                                 .padding(start = 16.dp, top = 350.dp, end = 16.dp, bottom = 16.dp)
                         ) {
                             Text(text = "Log in with Strava")
+                        }
+                    }
+                        else {
+
                         }
                     }
                 }
