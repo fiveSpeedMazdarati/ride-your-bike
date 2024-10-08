@@ -1,6 +1,7 @@
 package com.example.rideyourbike
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -22,18 +23,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.rideyourbike.common.Resource
+import com.example.rideyourbike.data.remote.dto.ActivitiesDTO
+import com.example.rideyourbike.presentation.main_screen.MainScreenState
 import com.example.rideyourbike.presentation.theme.RideyourbikeTheme
 import com.example.rideyourbike.presentation.viewmodel.LoginScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val viewModel: LoginScreenViewModel by viewModels()
-
+    private lateinit var state: MainScreenState
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        enableEdgeToEdge()
+        
 
         enableEdgeToEdge()
 
@@ -49,15 +61,16 @@ class MainActivity : ComponentActivity() {
             Log.d("LOGIN", "action: $appLinkAction")
             Log.d("LOGIN","code: $code")
 
-            val data = viewModel.getStravaData(code!!)
+            viewModel.getStravaData(code!!)
 
-            Log.d("LOGIN", "Retrieved Data: $data")
-
-
+            lifecycleScope.launch {
+                viewModel.state.collect {
+                    state = it
+                }
+            }
         }
         setContent {
             RideyourbikeTheme {
-
                 Scaffold() {
                     Column(
                         modifier = Modifier
@@ -68,52 +81,69 @@ class MainActivity : ComponentActivity() {
                             text = "Let's go biking!",
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 24.sp,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                                .padding(top = 48.dp)
-                        )
-
-if ( true ) {
-                        Button(
-                            onClick = {
-                                val intentUri =
-                                    Uri.parse("https://www.strava.com/oauth/mobile/authorize")
-                                        .buildUpon()
-                                        .appendQueryParameter("client_id", "136135")
-                                        .appendQueryParameter(
-                                            "redirect_uri",
-                                            "https://www.lukebusch.com/app"
-                                        )
-                                        .appendQueryParameter("response_type", "code")
-                                        .appendQueryParameter("approval_prompt", "auto")
-                                        .appendQueryParameter("scope", "activity:read")
-                                        .build()
-
-                                Intent(Intent.ACTION_VIEW, intentUri).also {
-                                    startActivity(it)
-                                }
-
-
-                            },
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
-                                .padding(start = 16.dp, top = 350.dp, end = 16.dp, bottom = 16.dp)
-                        ) {
-                            Text(text = "Log in with Strava")
+                                .padding(top = 48.dp)
+                        )
+                        when {
+                            state.isLoading -> {
+                                 // whatever loading indicator or screen
+                            }
+                            state.isError -> {
+                                // display some kind of error message
+                            }
+                            else -> {
+                                // in all other cases, display the data
+                                StravaData(state.data)
+                            }
                         }
-                    }
-                        else {
 
+                        if (state.displayLoginButton) {
+                            Button(
+                                onClick = {
+                                    val intentUri =
+                                        Uri.parse("https://www.strava.com/oauth/mobile/authorize")
+                                            .buildUpon()
+                                            .appendQueryParameter("client_id", "136135")
+                                            .appendQueryParameter(
+                                                "redirect_uri",
+                                                "https://www.lukebusch.com/app"
+                                            )
+                                            .appendQueryParameter("response_type", "code")
+                                            .appendQueryParameter("approval_prompt", "auto")
+                                            .appendQueryParameter("scope", "activity:read")
+                                            .build()
+
+                                        Intent(Intent.ACTION_VIEW, intentUri).also { it ->
+                                            startActivity(it)
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .align(Alignment.CenterHorizontally)
+                                        .padding(
+                                            start = 16.dp,
+                                            top = 350.dp,
+                                            end = 16.dp,
+                                            bottom = 16.dp
+                                        )
+                                )   {
+                                    Text(text = "Log in with Strava")
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-
-    }
     }
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
 
+}
+
+@Composable
+fun StravaData(data: ActivitiesDTO?) {
+    Log.d("LOGIN", data.toString())
 }

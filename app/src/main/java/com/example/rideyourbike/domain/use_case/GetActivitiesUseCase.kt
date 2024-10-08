@@ -5,7 +5,9 @@ import com.example.rideyourbike.data.remote.dto.ActivitiesDTO
 import com.example.rideyourbike.domain.repository.ActivitiesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
 import javax.inject.Inject
+import kotlin.coroutines.coroutineContext
 
 class GetActivitiesUseCase @Inject constructor (
     private val repository : ActivitiesRepository

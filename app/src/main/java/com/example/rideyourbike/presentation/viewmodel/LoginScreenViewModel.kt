@@ -9,6 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,11 +23,11 @@ class LoginScreenViewModel @Inject constructor(private val getActivitiesUseCase:
         viewModelScope.launch {
             getActivitiesUseCase.getActivities(authToken).onEach {
                 when(it) {
-                    is Resource.Loading -> _state.value = MainScreenState(data = null, isLoading = true)
-                    is Resource.Error -> _state.value = MainScreenState(data = null, isLoading = false)
-                    is Resource.Success -> _state.value = MainScreenState(data = it.data, isLoading = false)
+                    is Resource.Loading -> _state.value = MainScreenState(data = null, isLoading = true, isError = false)
+                    is Resource.Error -> _state.value = MainScreenState(data = null, isLoading = false, isError = true)
+                    is Resource.Success -> _state.value = MainScreenState(data = it.data, isLoading = false, isError = false)
                 }
-            }
+            }.launchIn(viewModelScope)
         }
     }
 
