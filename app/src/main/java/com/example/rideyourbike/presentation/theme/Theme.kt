@@ -1,4 +1,4 @@
-package com.example.rideyourbike.ui.theme
+package com.example.rideyourbike.presentation.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

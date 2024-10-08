@@ -24,8 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.rideyourbike.ui.theme.RideyourbikeTheme
-import com.example.rideyourbike.ui.viewmodel.LoginScreenViewModel
+import com.example.rideyourbike.presentation.theme.RideyourbikeTheme
+import com.example.rideyourbike.presentation.viewmodel.LoginScreenViewModel
 
 
 class MainActivity : ComponentActivity() {

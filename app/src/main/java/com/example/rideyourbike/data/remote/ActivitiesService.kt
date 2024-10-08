@@ -6,6 +6,6 @@ import retrofit2.http.GET
 
 interface ActivitiesService {
 
-    @GET(Constants.ACTIVITIES_ENDPOINT+"/getLoggedInAthleteActivities")
+    @GET()
     suspend fun getAllActivities() : ActivitiesDTO
 }

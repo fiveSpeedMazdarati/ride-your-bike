@@ -1,4 +1,4 @@
-package com.example.rideyourbike.ui.theme
+package com.example.rideyourbike.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

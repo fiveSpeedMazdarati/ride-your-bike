@@ -1,15 +1,16 @@
-package com.example.rideyourbike.ui.viewmodel
+package com.example.rideyourbike.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.rideyourbike.ui.main_screen.MainScreenState
+import com.example.rideyourbike.presentation.main_screen.MainScreenState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 class LoginScreenViewModel : ViewModel() {
 
-    val _state = MutableStateFlow<MainScreenState>(MainScreenState())
+    private val _state = MutableStateFlow<MainScreenState>(MainScreenState())
     val state: StateFlow<MainScreenState> = _state
 
     init {
