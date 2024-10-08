@@ -8,16 +8,14 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -26,14 +24,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rideyourbike.presentation.theme.RideyourbikeTheme
 import com.example.rideyourbike.presentation.viewmodel.LoginScreenViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: LoginScreenViewModel by viewModels()
+
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val viewModel = LoginScreenViewModel()
 
         enableEdgeToEdge()
 
@@ -49,7 +49,11 @@ class MainActivity : ComponentActivity() {
             Log.d("LOGIN", "action: $appLinkAction")
             Log.d("LOGIN","code: $code")
 
-            viewModel.getStravaData()
+            val data = viewModel.getStravaData(code!!)
+
+            Log.d("LOGIN", "Retrieved Data: $data")
+
+
         }
 
         setContent {
@@ -73,7 +77,7 @@ class MainActivity : ComponentActivity() {
                                     .appendQueryParameter("scope", "activity:read")
                                     .build()
 
-                                val loginIntent = Intent(Intent.ACTION_VIEW, intentUri,  ).also {
+                                Intent(Intent.ACTION_VIEW, intentUri).also {
                                     startActivity(it)
                                 }
 
@@ -93,22 +97,8 @@ class MainActivity : ComponentActivity() {
     }
     }
 
-
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Composable
-fun LoginScreen(viewModel: LoginScreenViewModel) {
-
-    val scope = rememberCoroutineScope()
-    val snackbarHostState  = remember  { SnackbarHostState() }
-
-
-
-}
-
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    RideyourbikeTheme {
-        LoginScreen(LoginScreenViewModel())
-    }
+
 }

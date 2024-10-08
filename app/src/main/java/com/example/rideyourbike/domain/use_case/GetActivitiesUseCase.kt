@@ -1,18 +1,19 @@
 package com.example.rideyourbike.domain.use_case
 
 import com.example.rideyourbike.common.Resource
-import com.example.rideyourbike.domain.model.ActivityDisplayItem
+import com.example.rideyourbike.data.remote.dto.ActivitiesDTO
 import com.example.rideyourbike.domain.repository.ActivitiesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
-class GetActivitiesUseCase (
+class GetActivitiesUseCase @Inject constructor (
     private val repository : ActivitiesRepository
 ) {
-    operator fun invoke(): Flow<Resource<ActivityDisplayItem>> = flow {
+    fun getActivities(authToken: String): Flow<Resource<ActivitiesDTO>> = flow {
         emit(Resource.Loading())
 
-        val activities = repository.getAllActivities()
+        val activities = repository.getAllActivities(authToken)
 
         activities.data?.let {
             emit(Resource.Success(activities.data))
