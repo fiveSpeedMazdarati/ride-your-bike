@@ -4,6 +4,7 @@ package com.example.rideyourbike.data.remote.dto
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 import android.os.Parcelable
+import com.example.rideyourbike.domain.model.ActivityDisplayItem
 
 @Parcelize
 data class ActivitiesDTOItem(
@@ -104,3 +105,13 @@ data class ActivitiesDTOItem(
     @SerializedName("visibility")
     val visibility: String
 ) : Parcelable
+
+fun ActivitiesDTOItem.toActivityDisplayItem() : ActivityDisplayItem {
+    return ActivityDisplayItem(
+        name = name,
+        type = type,
+        distance =distance,
+        averageHeartRate = averageHeartrate,
+        maxHeartRate = maxHeartrate
+    )
+}
