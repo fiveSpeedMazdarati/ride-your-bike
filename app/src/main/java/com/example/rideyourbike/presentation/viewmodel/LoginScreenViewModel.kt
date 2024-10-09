@@ -23,9 +23,9 @@ class LoginScreenViewModel @Inject constructor(private val getActivitiesUseCase:
         viewModelScope.launch {
             getActivitiesUseCase.getActivities(authToken).onEach {
                 when(it) {
-                    is Resource.Loading -> _state.value = MainScreenState(data = null, isLoading = true, isError = false)
-                    is Resource.Error -> _state.value = MainScreenState(data = null, isLoading = false, isError = true)
-                    is Resource.Success -> _state.value = MainScreenState(data = it.data, isLoading = false, isError = false)
+                    is Resource.Loading -> _state.value = MainScreenState(data = null, isLoading = true, isError = false, displayLoginButton = false)
+                    is Resource.Error -> _state.value = MainScreenState(data = null, isLoading = false, isError = true, displayLoginButton = false)
+                    is Resource.Success -> _state.value = MainScreenState(data = it.data, isLoading = false, isError = false, displayLoginButton = false)
                 }
             }.launchIn(viewModelScope)
         }

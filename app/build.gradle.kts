@@ -67,6 +67,8 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.okhttp)
     implementation(libs.retrofit)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     //implementation(libs.com.google.dagger.hilt.android.gradle.plugin)
     //implementation(libs.com.android.legacy.kapt.gradle.plugin)
     testImplementation(libs.junit)
