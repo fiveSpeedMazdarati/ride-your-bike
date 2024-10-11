@@ -2,22 +2,16 @@ package com.example.rideyourbike.presentation.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.rideyourbike.common.Resource
-import com.example.rideyourbike.data.remote.dto.ActivitiesDTO
 import com.example.rideyourbike.data.remote.dto.ActivitiesDTOItem
-import com.example.rideyourbike.data.remote.dto.TokenExchangeResponseDTO
 import com.example.rideyourbike.data.repository.TokenExchangeRequestData
 import com.example.rideyourbike.domain.use_case.GetAccessTokenUseCase
 import com.example.rideyourbike.domain.use_case.GetActivitiesUseCase
 import com.example.rideyourbike.presentation.main_screen.MainScreenState
+import com.example.rideyourbike.presentation.model.SummaryData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -69,4 +63,29 @@ class LoginScreenViewModel @Inject constructor(
         _state.value = _state.value.copy(isLoggedIn = b, displayLoginButton = false)
     }
 
+    fun calculateSummaryData(data: List<ActivitiesDTOItem>): SummaryData {
+        val distances = data.map { it.distance }
+        val totalKudos = data.map { it.hasKudoed }.count {
+            it == true
+        }
+
+        val emoji = determineEmoji(totalKudos.toFloat(), data.size.toFloat() )
+
+        return SummaryData(
+            countOfActivities = data.size,
+            averageDistance = distances.average().toInt(),
+            countOfKudos = totalKudos,
+            emoji = emoji)
+    }
+
+    private fun determineEmoji(countOfKudos: Float, countOfActivities: Float) : String {
+        val calculatedKudosValue = countOfKudos / countOfActivities
+
+        return when {
+            calculatedKudosValue <= .25 -> { "\uD83D\uDE15" }
+            calculatedKudosValue <= .75 -> { "\uD83D\uDE03" }
+            calculatedKudosValue > .75 -> { "\uD83D\uDD25" }
+            else -> ""
+        }
+    }
 }

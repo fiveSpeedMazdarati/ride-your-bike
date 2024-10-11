@@ -10,18 +10,24 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,6 +40,8 @@ import com.example.rideyourbike.presentation.theme.RideyourbikeTheme
 import com.example.rideyourbike.presentation.viewmodel.LoginScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
@@ -77,15 +85,17 @@ class MainActivity : ComponentActivity() {
                 }
 
                 if (state.isLoggedIn && !state.fetchedStravaData) {
-                    runBlocking {
-                        viewModel.getAllTheData(
-                            TokenExchangeRequestData(
-                                clientSecret = Constants.CLIENT_SECRET,
-                                clientId = Constants.CLIENT_ID,
-                                code = accessCode,
-                                grantType = Constants.INITIAL_AUTHENTICATION_TYPE
+                    LaunchedEffect("dataFetch") {
+                        CoroutineScope(Dispatchers.IO,).launch {
+                            viewModel.getAllTheData(
+                                TokenExchangeRequestData(
+                                    clientSecret = Constants.CLIENT_SECRET,
+                                    clientId = Constants.CLIENT_ID,
+                                    code = accessCode,
+                                    grantType = Constants.INITIAL_AUTHENTICATION_TYPE
+                                )
                             )
-                        )
+                        }
                     }
 
                 }
@@ -166,7 +176,6 @@ fun LoginContent() {
 
 @Composable
 fun ErrorStateContent() {
-    val context = LocalContext.current
     Column() {
         Text(
             text = "There was a problem getting your information from Strava.",
@@ -183,8 +192,23 @@ fun ErrorStateContent() {
 
 @Composable
 fun StravaContent(data: List<ActivitiesDTOItem>) {
+
     Box(modifier = Modifier.fillMaxSize()) {
-        Text(text = "Got strava content!", modifier = Modifier.align(Alignment.Center))
+
+        LazyColumn {
+
+            item {
+                MainScreenListHeader("Name", "Type", "Distance")
+            }
+            data.forEach {
+                item {
+                    MainScreenDisplayItem(it)
+                }
+            }
+            item {
+                MainScreenSummary(data)
+            }
+        }
     }
     Log.d("LOGIN", data.toString())
 }
@@ -192,6 +216,52 @@ fun StravaContent(data: List<ActivitiesDTOItem>) {
 @Composable
 fun LoadingContent() {
     Box(modifier = Modifier.fillMaxSize()) {
-        Text("Getting your information...", modifier = Modifier.align(Alignment.Center))
+        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+    }
+}
+
+@Composable
+fun MainScreenDisplayItem(item: ActivitiesDTOItem) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp)
+    ) {
+        Text(text = item.name, modifier = Modifier.weight(.5f, true))
+        Text(text = item.type, modifier = Modifier.padding(start = 16.dp).weight(.3f, true))
+        Text(text = item.distance.toString(), modifier = Modifier.padding(start = 16.dp).weight(.2f, true))
+    }
+}
+
+@Composable
+fun MainScreenListHeader(text1: String, text2: String, text3: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp)
+            .padding(top = 24.dp, bottom = 16.dp)
+    ) {
+        Text(text = text1, modifier = Modifier.weight(.5f))
+        Text(text = text2, modifier = Modifier.padding(start = 16.dp).weight(.25f))
+        Text(text = text3, modifier = Modifier.padding(start = 16.dp).weight(.25f))
+    }
+}
+
+@Composable
+fun MainScreenSummary(
+    data: List<ActivitiesDTOItem>,
+    viewModel: LoginScreenViewModel = viewModel<LoginScreenViewModel>()
+) {
+    val summaryData = viewModel.calculateSummaryData(data)
+
+    Column(modifier = Modifier.padding(horizontal = 36.dp)) {
+        Text(
+            text = "Summary",
+            style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium),
+            modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
+        )
+        Text(text = "Activities: ${summaryData.countOfActivities}")
+        Text(text = "Average Distance: ${summaryData.averageDistance}")
+        Text("${summaryData.countOfKudos} of your activities have Kudos    ${summaryData.emoji}")
     }
 }
