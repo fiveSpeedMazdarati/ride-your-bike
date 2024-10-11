@@ -8,7 +8,7 @@ In general, I tried to use Clean code principals and a mix of MVVM and MVI patte
 With more time, I could make this more production-ready by refactoring some things and sticking to the design patters more strictly, but within the time constraints I made the choice to get the data onto the screen first and refactor later.
 
 
-## Requirements to build and run the app:
+## Requirements to build and run the app
 - Device with a minimumSdk of 30 (Android 11)
 - Internet connection
 - Strava account
