@@ -15,7 +15,7 @@ data class ActivitiesDTOItem(
     @SerializedName("athlete_count")
     val athleteCount: Int,
     @SerializedName("average_heartrate")
-    val averageHeartrate: Int,
+    val averageHeartrate: Double,
     @SerializedName("average_speed")
     val averageSpeed: Double,
     @SerializedName("comment_count")

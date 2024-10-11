@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,17 +25,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.rideyourbike.data.remote.dto.ActivitiesDTO
+import com.example.rideyourbike.common.Constants
+import com.example.rideyourbike.data.remote.dto.ActivitiesDTOItem
+import com.example.rideyourbike.data.repository.TokenExchangeRequestData
+import com.example.rideyourbike.presentation.main_screen.MainScreenState
 import com.example.rideyourbike.presentation.theme.RideyourbikeTheme
 import com.example.rideyourbike.presentation.viewmodel.LoginScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private var code: String = ""
+    private var accessCode: String = ""
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,33 +49,63 @@ class MainActivity : ComponentActivity() {
             RideyourbikeTheme {
 
                 val viewModel = viewModel<LoginScreenViewModel>()
-                val state by viewModel.state.collectAsStateWithLifecycle()
+                val state by viewModel.state.collectAsState(MainScreenState())
 
                 val appLinkIntent: Intent = intent
-                val appLinkAction: String? = appLinkIntent.action
+                var appLinkAction: String? = appLinkIntent.action
                 val appLinkData: Uri? = appLinkIntent.data
-                code = ""
+
                 // determine if it is the default launch or if it was captured from a URL
-                if (appLinkAction != null && appLinkData?.getQueryParameter("code") != null) {
+                if (appLinkAction == "android.intent.action.VIEW" && appLinkData?.getQueryParameter(
+                        "code"
+                    ) != null
+                ) {
 
                     // when authenticated, call API and get data to display on the screen
                     appLinkData.getQueryParameter("code")?.let {
-                        code = it
+                        accessCode = it
                     }
 
                     Log.d("LOGIN", "action: $appLinkAction")
-                    Log.d("LOGIN", "code: $code")
+                    Log.d("LOGIN", "code: $accessCode")
 
-                    viewModel.getStravaData(code)
+                    viewModel.setLoggedIn(true)
+
                     // solves a bug where the app would repeatedly try to fetch the Strava data on error
                     appLinkIntent.setAction(null)
+                    appLinkAction = null
+                }
+
+                if (state.isLoggedIn && !state.fetchedStravaData) {
+                    runBlocking {
+                        viewModel.getAllTheData(
+                            TokenExchangeRequestData(
+                                clientSecret = Constants.CLIENT_SECRET,
+                                clientId = Constants.CLIENT_ID,
+                                code = accessCode,
+                                grantType = Constants.INITIAL_AUTHENTICATION_TYPE
+                            )
+                        )
+                    }
+
                 }
 
                 when {
-                    state.isError -> ErrorStateContent(code, viewModel)
-                    state.isLoading -> LoadingContent()
-                    state.displayLoginButton -> LoginContent()
-                    state.data?.items?.isNotEmpty() == true -> StravaContent(state.data)
+                    state.data.isNotEmpty() -> {
+                        StravaContent(state.data)
+                    }
+
+                    state.displayLoginButton -> {
+                        LoginContent()
+                    }
+
+                    state.isLoading -> {
+                        LoadingContent()
+                    }
+
+                    state.isError -> {
+                        ErrorStateContent()
+                    }
                 }
             }
         }
@@ -100,7 +135,7 @@ fun LoginContent() {
                     val intentUri =
                         Uri.parse("https://www.strava.com/oauth/mobile/authorize")
                             .buildUpon()
-                            .appendQueryParameter("client_id", "136135")
+                            .appendQueryParameter("client_id", Constants.CLIENT_ID.toString())
                             .appendQueryParameter(
                                 "redirect_uri",
                                 "https://www.lukebusch.com/app"
@@ -113,8 +148,6 @@ fun LoginContent() {
                     Intent(Intent.ACTION_VIEW, intentUri).also {
                         context.startActivity(it)
                     }
-
-
                 },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -132,7 +165,8 @@ fun LoginContent() {
 }
 
 @Composable
-fun ErrorStateContent(code: String, viewModel: LoginScreenViewModel) {
+fun ErrorStateContent() {
+    val context = LocalContext.current
     Column() {
         Text(
             text = "There was a problem getting your information from Strava.",
@@ -143,18 +177,15 @@ fun ErrorStateContent(code: String, viewModel: LoginScreenViewModel) {
                 .padding(start = 24.dp, end = 24.dp)
                 .align(Alignment.CenterHorizontally)
         )
-        Button(onClick = {
-            viewModel.getStravaData(code)
-        },
-            modifier =
-            Modifier.align(Alignment.CenterHorizontally).padding(top = 48.dp)) {
-            Text(text = "Try again")
-        }
+
     }
 }
 
 @Composable
-fun StravaContent(data: ActivitiesDTO?) {
+fun StravaContent(data: List<ActivitiesDTOItem>) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Text(text = "Got strava content!", modifier = Modifier.align(Alignment.Center))
+    }
     Log.d("LOGIN", data.toString())
 }
 
